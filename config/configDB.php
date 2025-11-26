@@ -1,5 +1,5 @@
 <?php
-
+use  Cgarcher\Fix\Database\PDO;
 class configDB {
 
      private static PDO $instance;
@@ -24,10 +24,28 @@ class configDB {
      }
 
      private function getValues(){
-        $conf =  parse_ini_file('config.ini');
-        self::$host = $conf['host'];
-        self::$user = $conf['user'];
-        self::$pass = $conf['pass'];
+// Si estamos en Render usamos variables de entorno
+if (getenv('DB_HOST')) {
+
+    $host = getenv('DB_HOST');
+    $name = getenv('DB_NAME');
+    $user = getenv('DB_USER');
+    $pass = getenv('DB_PASSWORD');
+    $port = getenv('DB_PORT') ?: 3306;
+
+    // construimos el DSN igual que en config.ini
+    self::$host = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
+    self::$user = $user;
+    self::$pass = $pass;
+
+} else {
+    // En local, leer config.ini como siempre
+    $conf = parse_ini_file('config.ini');
+    self::$host = $conf['host'];
+    self::$user = $conf['user'];
+    self::$pass = $conf['pass'];
+}
+
      }
 
      /**
